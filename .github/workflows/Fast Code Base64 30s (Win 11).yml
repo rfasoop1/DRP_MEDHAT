@@ -1,11 +1,11 @@
-name: Fast Code Base64 30s (11)
+name: Fast Code Base64 30s (WIN 11)
 
 on:
   workflow_dispatch:
 
 jobs:
   deployment:
-    runs-on: windows-latest  # <-- تم التغيير هنا للحصول على أحدث نسخة ( Win 11)
+    runs-on: windows-latest
     timeout-minutes: 360
 
     env:
@@ -15,12 +15,18 @@ jobs:
       aa1: "dHNrZXktYXV0aC1rc2JSdEZKZDJ0MTFDTlRSTC1yWlk4SjF2SGdZZ3Q4N0NQanFFQ1lnM0ZFMTFGTU1XQlI="
 
       # باقي المتغيرات
-      aa2: "DDDDDDDAAAA"
+      aa2: "XCDOOD"
       aa3: "Zxxz4444"
 
       # الروابط
-      TAILSCALE_URL: "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi"
-      NST_URL: "https://tinyurl.com/nstkkdkac44"
+      TAILSCALE_URL: "https://tinyurl.com/tadownload5214"
+      
+      # ----------------------------------------------------
+      # تم التعديل: ضع رابط ملف Zip الخاص بـ NST هنا
+      # تأكد أن الرابط ينتهي بـ dl=1 للتحميل المباشر
+      # ----------------------------------------------------
+      NST_ZIP_URL: "https://tinyurl.com/sntbrwser12" 
+      
       RUST_URL: "https://tinyurl.com/ruskaaaaa11"
       ZIP_URL: "https://tinyurl.com/filesdownlaodkkda45"
 
@@ -113,9 +119,9 @@ jobs:
           }
 
       # ====================================================
-      # الخطوة 3: تثبيت البرامج (بدون باسوورد RustDesk)
+      # الخطوة 3: تثبيت البرامج (مع التعديل الجديد لـ NST)
       # ====================================================
-      - name: Install Software (Rust -> Zip -> NST)
+      - name: Install Software (Rust -> Zip -> NST Custom)
         shell: pwsh
         run: |
           function Download-File($u, $o) {
@@ -149,12 +155,25 @@ jobs:
               }
           }
           
-          # NST Browser
-          Write-Host "==== STEP 6: NST BROWSER ===="
-          $nstExe = Join-Path $TempDir 'nst.exe'
-          if (Download-File $env:NST_URL $nstExe) {
-              $args = @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-", "/S")
-              Start-Process -FilePath $nstExe -ArgumentList $args -NoNewWindow -Wait
+          # NST Browser (Updated for Zip from Dropbox)
+          Write-Host "==== STEP 6: NST BROWSER (FROM ZIP) ===="
+          $nstZip = Join-Path $TempDir 'nst_latest.zip'
+          $nstExtractDir = Join-Path $TempDir 'nst_extracted'
+          
+          if (Download-File $env:NST_ZIP_URL $nstZip) {
+              # فك الضغط
+              Expand-Archive -Path $nstZip -DestinationPath $nstExtractDir -Force
+              
+              # البحث عن ملف التثبيت (exe) تلقائياً
+              $installer = Get-ChildItem -Path $nstExtractDir -Filter "*.exe" -Recurse | Select-Object -First 1
+              
+              if ($installer) {
+                  Write-Host "Installing from: $($installer.FullName)"
+                  $args = @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-", "/S")
+                  Start-Process -FilePath $installer.FullName -ArgumentList $args -NoNewWindow -Wait
+              } else {
+                  Write-Error "No .exe installer found in the zip file!"
+              }
           }
 
       # ====================================================
